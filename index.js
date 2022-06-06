@@ -24,6 +24,7 @@ function rejectPromise(message) {
  * @param {string} obj.deviceAddress The MAC address for the device that should be updated
  * @param {string} [obj.deviceName = null] The name of the device in the update notification
  * @param {string} obj.filePath The file system path to the zip-file used for updating
+ * @param {Boolean} obj.keepBond This flag indicates whether the bond information should be kept or removed after an upgrade of the Application (Android only)
  * @param {Boolean} obj.alternativeAdvertisingNameEnabled Send unique name to device before it is switched into bootloader mode (iOS only)
  * @returns {Promise} A promise that resolves or rejects with the `deviceAddress` in the return value
  *
@@ -42,6 +43,7 @@ function startDFU({
   deviceAddress,
   deviceName = null,
   filePath,
+  keepBond = false,
   alternativeAdvertisingNameEnabled = true
 }) {
   if (deviceAddress == undefined) {
@@ -54,7 +56,7 @@ function startDFU({
   if (Platform.OS === 'ios') {
     return RNNordicDfu.startDFU(upperDeviceAddress, deviceName, filePath, alternativeAdvertisingNameEnabled);
   }
-  return RNNordicDfu.startDFU(upperDeviceAddress, deviceName, filePath);
+  return RNNordicDfu.startDFU(upperDeviceAddress, deviceName, filePath, keepBond);
 }
 
 /**
