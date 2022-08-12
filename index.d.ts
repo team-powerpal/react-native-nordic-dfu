@@ -5,13 +5,15 @@ declare module 'react-native-nordic-dfu' {
       deviceName,
       filePath,
       keepBond,
-      alternativeAdvertisingNameEnabled
+      alternativeAdvertisingNameEnabled,
+      forceScanForNewAddress
     }: {
       deviceAddress: string;
       deviceName?: string;
       filePath: string | null;
       keepBond?: boolean;
       alternativeAdvertisingNameEnabled?: boolean;
+      forceScanForNewAddress?: boolean;
     }): Promise<string>;
   }
 
@@ -22,14 +24,17 @@ declare module 'react-native-nordic-dfu' {
     avgSpeed?: number;
     speed?: number;
     state?: string;
+    deviceAddress?: string;
+    level?: number;
+    message?: string;
   }
 
   export class DFUEmitter {
     static addListener(
-      name: 'DFUProgress' | 'DFUStateChanged',
+      name: 'DFUProgress' | 'DFUStateChanged' | 'DFULogEvent',
       handler: (update: IDfuUpdate) => void
     ): void;
 
-    static removeAllListeners(name: 'DFUProgress' | 'DFUStateChanged'): void;
+    static removeAllListeners(name: 'DFUProgress' | 'DFUStateChanged' | 'DFULogEvent'): void;
   }
 }

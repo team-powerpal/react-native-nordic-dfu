@@ -26,6 +26,7 @@ function rejectPromise(message) {
  * @param {string} obj.filePath The file system path to the zip-file used for updating
  * @param {Boolean} obj.keepBond This flag indicates whether the bond information should be kept or removed after an upgrade of the Application (Android only)
  * @param {Boolean} obj.alternativeAdvertisingNameEnabled Send unique name to device before it is switched into bootloader mode (iOS only)
+ * @param {Boolean} obj.forceScanForNewAddress When this is set to true, the Legacy Buttonless Service will scan for the device advertising with an incremented MAC address (Android only)
  * @returns {Promise} A promise that resolves or rejects with the `deviceAddress` in the return value
  *
  * @example
@@ -44,7 +45,8 @@ function startDFU({
   deviceName = null,
   filePath,
   keepBond = false,
-  alternativeAdvertisingNameEnabled = true
+  alternativeAdvertisingNameEnabled = true,
+  forceScanForNewAddress = false
 }) {
   if (deviceAddress == undefined) {
     return rejectPromise("No deviceAddress defined");
@@ -53,10 +55,21 @@ function startDFU({
     return rejectPromise("No filePath defined");
   }
   const upperDeviceAddress = deviceAddress.toUpperCase();
-  if (Platform.OS === 'ios') {
-    return RNNordicDfu.startDFU(upperDeviceAddress, deviceName, filePath, alternativeAdvertisingNameEnabled);
+  if (Platform.OS === "ios") {
+    return RNNordicDfu.startDFU(
+      upperDeviceAddress,
+      deviceName,
+      filePath,
+      alternativeAdvertisingNameEnabled
+    );
   }
-  return RNNordicDfu.startDFU(upperDeviceAddress, deviceName, filePath, keepBond);
+  return RNNordicDfu.startDFU(
+    upperDeviceAddress,
+    deviceName,
+    filePath,
+    keepBond,
+    forceScanForNewAddress
+  );
 }
 
 /**

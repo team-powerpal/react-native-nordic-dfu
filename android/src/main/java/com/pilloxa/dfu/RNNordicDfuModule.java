@@ -15,6 +15,7 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
 
     private final String dfuStateEvent = "DFUStateChanged";
     private final String progressEvent = "DFUProgress";
+    private final String dfuLogEvent = "DFULogEvent";
     private static final String name = "RNNordicDfu";
     public static final String LOG_TAG = name;
     private final ReactApplicationContext reactContext;
@@ -30,7 +31,7 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
     }
 
     @ReactMethod
-    public void startDFU(String address, String name, String filePath, Boolean keepBond, Promise promise) {
+    public void startDFU(String address, String name, String filePath, Boolean keepBond, Boolean forceScanForNewAddress, Promise promise) {
         mPromise = promise;
         final DfuServiceInitiator starter = new DfuServiceInitiator(address)
                 .setKeepBond(keepBond);
@@ -38,6 +39,8 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
         if (name != null) {
             starter.setDeviceName(name);
         }
+
+        starter.setForceScanningForNewAddressInLegacyDfu(forceScanForNewAddress);
         starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true);
         starter.setZip(filePath);
         final DfuServiceController controller = starter.start(this.reactContext, DfuService.class);
@@ -63,11 +66,18 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
         sendEvent(dfuStateEvent, map);
     }
 
+    private void sendLogEvent(String deviceAddress, int level, String message) {
+        WritableMap map = Arguments.createMap();
+        map.putString("deviceAddress", deviceAddress);
+        map.putInt("level", level);
+        map.putString("message", message);
+        sendEvent(dfuLogEvent, map);
+    }
 
     @Override
     public void onHostResume() {
         DfuServiceListenerHelper.registerProgressListener(this.reactContext, mDfuProgressListener);
-
+        DfuServiceListenerHelper.registerLogListener(this.reactContext, mDfuLogListener);
     }
 
     @Override
@@ -77,9 +87,35 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
     @Override
     public void onHostDestroy() {
         DfuServiceListenerHelper.unregisterProgressListener(this.reactContext, mDfuProgressListener);
-
+        DfuServiceListenerHelper.unregisterLogListener(this.reactContext, mDfuLogListener);
     }
 
+    private final DfuLogListener mDfuLogListener = new DfuLogListener() {
+        @Override
+        public void onLogEvent(String deviceAddress, int level, String message) {
+            switch(level) {
+                case DfuBaseService.LOG_LEVEL_DEBUG:
+                    Log.d(LOG_TAG, message);
+                    break;
+                case DfuBaseService.LOG_LEVEL_VERBOSE:
+                    Log.v(LOG_TAG, message);
+                    break;
+                case DfuBaseService.LOG_LEVEL_WARNING:
+                    Log.w(LOG_TAG, message);
+                    break;
+                case DfuBaseService.LOG_LEVEL_ERROR:
+                    Log.e(LOG_TAG, message);
+                    break;
+                case DfuBaseService.LOG_LEVEL_INFO:
+                case DfuBaseService.LOG_LEVEL_APPLICATION:
+                default:
+                    Log.i(LOG_TAG, message);
+                    break;
+            }
+
+            sendLogEvent(deviceAddress, level, message);
+        }
+    };
 
     /**
      * The progress listener receives events from the DFU Service.
