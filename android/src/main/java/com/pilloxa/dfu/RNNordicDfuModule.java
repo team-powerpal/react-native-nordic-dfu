@@ -32,18 +32,23 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
 
     @ReactMethod
     public void startDFU(String address, String name, String filePath, Boolean keepBond, Boolean forceScanForNewAddress, Promise promise) {
-        mPromise = promise;
-        final DfuServiceInitiator starter = new DfuServiceInitiator(address)
-                .setKeepBond(keepBond);
+        try {
+            mPromise = promise;
+            final DfuServiceInitiator starter = new DfuServiceInitiator(address)
+                    .setKeepBond(keepBond);
 
-        if (name != null) {
-            starter.setDeviceName(name);
+            if (name != null) {
+                starter.setDeviceName(name);
+            }
+
+            starter.setForceScanningForNewAddressInLegacyDfu(forceScanForNewAddress);
+            starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true);
+            starter.setZip(filePath);
+            final DfuServiceController controller = starter.start(this.reactContext, DfuService.class);
         }
-
-        starter.setForceScanningForNewAddressInLegacyDfu(forceScanForNewAddress);
-        starter.setUnsafeExperimentalButtonlessServiceInSecureDfuEnabled(true);
-        starter.setZip(filePath);
-        final DfuServiceController controller = starter.start(this.reactContext, DfuService.class);
+        catch(Exception ex) {
+            promise.reject("DFU_FAILED", ex);
+        }
     }
 
     @Override
