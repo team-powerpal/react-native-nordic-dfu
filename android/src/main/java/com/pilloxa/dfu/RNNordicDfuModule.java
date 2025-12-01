@@ -81,6 +81,10 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
 
     @Override
     public void onHostResume() {
+        if (this.reactContext == null) {
+            return;
+        }
+
         DfuServiceListenerHelper.registerProgressListener(this.reactContext, mDfuProgressListener);
         DfuServiceListenerHelper.registerLogListener(this.reactContext, mDfuLogListener);
     }
@@ -91,6 +95,10 @@ public class RNNordicDfuModule extends ReactContextBaseJavaModule implements Lif
 
     @Override
     public void onHostDestroy() {
+        if (this.reactContext == null) {
+            return;
+        }
+        
         DfuServiceListenerHelper.unregisterProgressListener(this.reactContext, mDfuProgressListener);
         DfuServiceListenerHelper.unregisterLogListener(this.reactContext, mDfuLogListener);
     }
