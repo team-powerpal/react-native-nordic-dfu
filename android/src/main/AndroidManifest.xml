@@ -1,9 +1,10 @@
-
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.pilloxa.dfu">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android" package="com.pilloxa.dfu">
     <application>
-        <service android:name=".DfuService"/>
+        <service android:name=".DfuService" android:exported="false" android:foregroundServiceType="connectedDevice"/>
     </application>
 
+
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_CONNECTED_DEVICE"/>
 </manifest>
   
